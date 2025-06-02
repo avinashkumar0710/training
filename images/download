@@ -1,0 +1,59 @@
+
+<!---- HEADER PART  ----->
+<!---- #include virtual="/asp/header.asp" ----->
+
+<!--- Content part , LEFT and CONTENT ---------->
+<table width="100%" border="0" align="center" cellpadding="0" cellspacing="0" bgcolor="#b1c8cd">
+	<tr width="100%">
+    <td colspan="2" valign="top" bgcolor="#C8D6DB">
+	<table width="100%" bgcolor="#b1c8cd">
+	<tr>
+	
+	<td width="*" height="100%" valign="top">
+	<!----------- ACTUAL CONTENT PART --------->
+	<table width="100%" height="100%" border="0" cellpadding="0" cellspacing="0">	
+		<tr>
+			<td width="12" class="BoxTL"></td>
+            <td class="BoxTop" bgcolor="Navy"></td>
+            <td width="12" class="BoxTR"></td>
+          </tr>
+          <tr>
+            <td class="BoxLeft"></td>
+            <td bgcolor="#FFFFFF" class="BoxContent">
+					<!----- this is the actual content file --------------->
+					<%
+					if Request.QueryString("pg") <> "" then
+						'HERE EXECUTE THE COMMAND FOR THE PAGE LOADING
+						Dim fso
+						Set fso = Server.CreateObject("Scripting.FileSystemObject")
+						'CHECK WHETHER FILE EXISTS OR NOT 
+						if fso.FileExists( Server.MapPath("./") & "\" & Request.QueryString("pg") & ".asp") then
+							Server.Execute("./" & Request.QueryString("pg") & ".asp")
+						else
+							Response.Write("NO DATA FOUND CONTACT SYSTEM ADMINISTRATOR")
+						end if
+					else
+						%>
+								<!--- #include file="./content.htm" --->
+						<%
+					end if
+					%>
+					<!----- this is the actual content file --------------->
+
+            </td>
+
+
+            <td class="BoxRight"></td>
+          </tr>
+          
+		  <tr>
+            <td class="BoxBL"></td>
+            <td class="BoxBottom" bgcolor="Navy"></td>
+            <td class="BoxBR"></td>
+		  </tr>
+		</table>
+	
+	</td>
+	</tr>
+</table>
+<!---- #include virtual="/asp/footer.asp" ------>

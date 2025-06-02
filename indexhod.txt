@@ -1,0 +1,132 @@
+echo '<h3>Pending List</h3>';
+echo '<div class="table" style="height:465px; overflow-x: auto;">';
+echo '<form action="approve.php" method="post" id="approveForm">
+
+    <table class="table table-bordered border-success" border="3" border="1">
+        <thead>
+            <tr>           
+                    
+                <th scope="col">Name</th>
+                <th scope="col">Program_name</th>
+                <th scope="col">Faculty</th>
+                <th scope="col">Nature of Training</th>
+                <th scope="col">Year</th>
+                <th scope="col">Duration</th>            
+                <th scope="col">Tentative_Date</th>     
+                <th scope="col">Target_group</th>
+                <th scope="col">Remarks</th>
+                <th scope="col">Approve / Reject</th>              
+            </tr>
+        </thead>
+        <tbody>';
+
+$sql = "SELECT r.Id, r.srl_no, e.name, e.empno, r.Program_name, r.Faculty, r.nature_training, r.year,  r.remarks, r.duration, r.tentative_date, r.target_group 
+    FROM [Complaint].[dbo].[request] r
+    JOIN [Complaint].[dbo].[emp_mas_sap] e ON r.empno = e.empno
+    WHERE  flag='Pending'";
+
+$stmt = sqlsrv_query($conn, $sql);
+
+if ($stmt === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+
+// Process the fetched data
+while ($row = sqlsrv_fetch_array($stmt, SQLSRV_FETCH_ASSOC)) {
+    // Output each row as a table row
+    echo '<tr class="table-light">';
+    echo "<input type='hidden' name='id[]' value='{$row['Id']}'>";
+    echo "<input type='hidden' name='srl_no[]' value='{$row['srl_no']}'>";
+    echo "<input type='hidden' name='empno[]' value='{$row['empno']}'>";
+
+    echo '<td style="display:none">' . $row['Id'] . '</td>'; //hidden
+    echo '<td style="display:none">' . $row['srl_no'] . '</td>'; //hidden
+
+    echo '<td>' . $row['name'] . '</td>';
+    echo '<td>' . $row['Program_name'] . '</td>';
+    echo "<td>{$row['Faculty']}</td>";
+    echo "<td>{$row['nature_training']}</td>";
+    echo "<td>{$row['year']}</td>";
+    echo "<td>{$row['duration']}</td>";
+    echo "<td>{$row['tentative_date']}</td>";
+    echo "<td>{$row['target_group']}</td>";
+    echo "<td>{$row['remarks']}</td>";
+
+    // echo '<td>
+    //     <label class="checkbox-container">
+    //     <input type="checkbox" name="selectedIds[]" value="' . $row['Id'] . '" onchange="updateSubmitButton(this)">
+    //     <input type="hidden" name="selectedIdData[]" value="' . $row['Id'] . ',' . $row['srl_no'] . ',' . $row['empno'] . '">        
+    //         <span class="checkmark"></span>
+    //     </label>
+    // </td>';
+
+    echo '<td>
+        <select class="approval-dropdown" name="approvalStatus[' . $row['Id'] . ']" data-row-id="' . $row['Id'] . '" data-empno="' . $row['empno'] . '">  
+    <option selected>Select Approval Status</option>
+    <option value="Approve">Approve</option>
+    <option value="Reject">Reject</option>
+</select>
+<input type="hidden" name="selectedIdData[]" value="' . $row['Id'] . ',' . $row['srl_no'] . ',' . $row['empno'] . '">        
+       
+    </td>';
+
+
+
+    echo '</tr>';
+}
+
+// Close the table structure
+echo '</tbody></table>';
+echo '<button type="submit" id="approveButton" name="approve"  class="btn btn-success">Approve Selected</button>';
+echo '</form>';
+echo '</div>';
+
+
+// Close the connection
+sqlsrv_close($conn);
+?>
+    </div>
+    <!-- <script>
+function updateSubmitButton(checkbox) {
+    var selectedIds = document.querySelectorAll('input[name="selectedIds[]"]:checked');
+    var selectedData = [];
+
+    selectedIds.forEach(function (checkbox) {
+        var row = checkbox.closest('tr');
+        var id = row.querySelector('input[name="id[]"]').value;
+        var srl_no = row.querySelector('input[name="srl_no[]"]').value;
+        var empno = row.querySelector('input[name="empno[]"]').value;
+
+        selectedData.push({ id: id, srl_no: srl_no, empno: empno });
+    });
+
+    console.log('Selected Data:', selectedData);
+}
+</script> -->
+
+<script>
+    // Function to handle dropdown change event
+    function handleDropdownChange(event) {
+        // Retrieve the selected value from the dropdown
+        const selectedValue = event.target.value;
+        
+        // Retrieve the row ID from the data attribute
+        const rowId = event.target.dataset.rowId;
+
+        // Retrieve the empno from the data attribute
+        const empno = event.target.dataset.empno;
+        
+        // Log the selected value, row ID, and empno to the console
+        console.log("Selected Value:", selectedValue);
+        console.log("Row ID:", rowId);
+        console.log("Empno:", empno);
+    }
+    
+    // Get all dropdown elements with the class 'approval-dropdown'
+    const dropdowns = document.querySelectorAll('.approval-dropdown');
+    
+    // Add event listener to each dropdown
+    dropdowns.forEach(dropdown => {
+        dropdown.addEventListener('change', handleDropdownChange);
+    });
+</script>

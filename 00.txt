@@ -1,0 +1,30 @@
+<?php 
+// start a new session
+// Allow any origin to access this resource
+
+session_start();
+if (!isset($_SESSION["emp_num"])) {   
+    header("location:login.php");
+}
+
+$sessionemp = $_SESSION["emp_num"];
+
+// Add '00' in front if session value has only 6 digits
+if(strlen($sessionemp) == 6) {
+    $sessionemp = '00' . $sessionemp;
+}
+
+//echo 'empno' .$sessionemp;
+
+// Database Connection
+$serverName = "192.168.100.240";
+$connectionInfo = array(
+    "Database" => "complaint",
+    "UID" => "sa",
+    "PWD" => "Intranet@123"
+);           
+$conn = sqlsrv_connect($serverName, $connectionInfo);
+if ($conn === false) {
+    die(print_r(sqlsrv_errors(), true));
+}
+?>

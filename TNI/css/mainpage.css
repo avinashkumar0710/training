@@ -1,0 +1,76 @@
+body {
+
+    font-style: normal;
+    font-family: "Nunito Sans", sans-serif;
+    margin: 0;
+    padding: 0;
+
+}
+
+header {
+    background-color: #34495E;
+    color: #fff;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+}
+
+
+.title {
+    display: inline-block;
+}
+
+.container {
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+
+}
+
+.rectangle {
+    font-size: 20px;
+    width: 200px;
+    height: 350px;
+    /* Adjust height to your preference */
+    background-color: #f0f0f0;
+    margin: 0 10px;
+    display: flex;
+    text-align: center;
+    line-height: 350px;
+    /* Adjust line-height to vertically center text */
+    border: 2px solid #ccc;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(0, 0, 0, 0.1),
+        0 0 30px rgba(0, 0, 0, 0.1);
+    /* Multiple box shadows */
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    /* Add transition for color change */
+    position: relative;
+    border-radius: 10px;
+}
+
+.rectangle:hover {
+    transform: scale(1.1);
+    /* Adjust zoom level */
+    background-color: #e0e0e0;
+    /* Change background color on hover */
+}
+
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.no-underline {
+    text-decoration: none;
+}

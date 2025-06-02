@@ -1,0 +1,115 @@
+body {
+    font-style: normal;
+    font-family: "Nunito Sans", sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+header {
+    background-color: #34495E;
+    color: #fff;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+}
+
+.title {
+    display: inline-block;
+}
+
+.container {
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80vh;
+}
+
+.rectangle {
+    font-size: 20px;
+    width: 200px;
+    height: 350px;
+    background-color: #4CAF50;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    box-sizing: border-box;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+    border-radius: 10px;
+    margin: 0 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2),
+        0 0 20px rgba(0, 0, 0, 0.1),
+        0 0 30px rgba(0, 0, 0, 0.1);
+}
+
+.rectangle:hover {
+    background-color: #45a049;
+    transform: scale(1.1);
+}
+
+.rectangle span {
+    display: inline;
+    line-height: 30px;
+}
+
+footer {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+.no-underline {
+    text-decoration: none;
+}
+
+.title {
+    text-align: center;
+    margin-top: 20px;
+}
+
+/* Style for the fixed button */
+.fixed-btn {
+    position: fixed;
+    bottom: 60px;
+    right: -4px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* Style for the popup */
+.popup {
+    display: none;
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background-color: white;
+    border: 1px solid #ddd;
+    padding: 20px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 300px;
+    border-radius: 5px;
+}
+
+/* Style for the close button */
+.close-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 3px;
+    margin-top: 10px;
+    float: right;
+}
