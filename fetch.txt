@@ -1,0 +1,79 @@
+<script>
+    // Function to update data based on user input
+    function updateData() {
+        var searchQuery = document.getElementById('search_param').value.trim().toLowerCase();
+        console.log('Search Query:', searchQuery);
+
+        // Check if there is a search query
+        if (searchQuery !== '') {
+            // Fetch and update data based on searchQuery
+            fetch('fetch.php?search=' + searchQuery)
+                .then(response => response.json())
+                .then(data => {
+                    // Update the HTML content with the fetched data and highlight the search term
+                    var tableHtml = '';  // Initialize the table HTML
+                    data.forEach(row => {
+                        // Highlight the search term in each column
+                        for (var key in row) {
+                            if (row.hasOwnProperty(key) && typeof row[key] === 'string') {
+                                row[key] = highlightSearchTerm(row[key], searchQuery);
+                            }
+                        }
+
+                        // Construct the table row
+                        tableHtml += '<tr class="table-light">';
+                        tableHtml += '<td>' + row.srl_no + '</td>';
+                        tableHtml += '<td>' + row.Program_name + '</td>';
+                        tableHtml += '<td>' + row.nature_training + '</td>';
+                        tableHtml += '<td>' + row.duration + '</td>';
+                        tableHtml += '<td>' + row.faculty + '</td>';
+                        tableHtml += '<td>' + row.tentative_date + '</td>';
+                        tableHtml += '<td>' + row.year + '</td>';
+                        tableHtml += '<td>' + row.target_group + '</td>';
+                        tableHtml += '<td><input type="text" name="remarks[]" data-id="' + row.srl_no + '" placeholder="Enter remarks"></td>';
+                        tableHtml += '<td><label class="checkbox-container"><input type="checkbox" name="selectedIds[]" value="' + row.srl_no + '" onchange="updateSubmitButton()"><span class="checkmark"></span></label></td>';
+                        tableHtml += '</tr>';
+                    });
+
+                    // Update the HTML content
+                    document.getElementById('tbl_body').innerHTML = tableHtml;
+                })
+                .catch(error => console.error('Error:', error));
+        } else {
+            // Fetch and update default data
+            fetch('fetch.php')
+                .then(response => response.json())
+                .then(data => {
+                    // Update the HTML content with the fetched data
+                    var tableHtml = '';  // Initialize the table HTML
+                    data.forEach(row => {
+                        // Construct the table row
+                        tableHtml += '<tr class="table-light">';
+                        tableHtml += '<td>' + row.srl_no + '</td>';
+                        tableHtml += '<td>' + row.Program_name + '</td>';
+                        tableHtml += '<td>' + row.nature_training + '</td>';
+                        tableHtml += '<td>' + row.duration + '</td>';
+                        tableHtml += '<td>' + row.faculty + '</td>';
+                        tableHtml += '<td>' + row.tentative_date + '</td>';
+                        tableHtml += '<td>' + row.year + '</td>';
+                        tableHtml += '<td>' + row.target_group + '</td>';
+                        tableHtml += '<td><input type="text" name="remarks[]" data-id="' + row.srl_no + '" placeholder="Enter remarks"></td>';
+                        tableHtml += '<td><label class="checkbox-container"><input type="checkbox" name="selectedIds[]" value="' + row.srl_no + '" onchange="updateSubmitButton()"><span class="checkmark"></span></label></td>';
+                        tableHtml += '</tr>';
+                    });
+
+                    // Update the HTML content
+                    document.getElementById('tbl_body').innerHTML = tableHtml;
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    }
+
+    // Function to highlight the search term in a string
+    function highlightSearchTerm(text, searchTerm) {
+        return text.replace(new RegExp(searchTerm, 'gi'), match => `<span style="background-color: yellow;">${match}</span>`);
+    }
+
+    // Initial data update
+    // updateData();
+</script>

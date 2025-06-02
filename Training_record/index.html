@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Training Program Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   
+    <style>
+        :root {
+            --primary-color: #1a3f6e;
+            --secondary-color: #2a5a8f;
+            --accent-color: #4e73df;
+            --success-color: #1cc88a;
+            --info-color: #36b9cc;
+            --warning-color: #f6c23e;
+            --danger-color: #e74a3b;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fc;
+        }
+        
+        .dashboard-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 0.15rem 0.35rem rgba(0,0,0,.1);
+        }
+        
+        .card {
+            border-radius: 8px;
+            box-shadow: 0 0.15rem 0.35rem rgba(0,0,0,.1);
+            margin-bottom: 20px;
+            border: none;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,.125);
+            padding: 15px 20px;
+            border-radius: 8px 8px 0 0 !important;
+        }
+        
+        .filter-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 0.15rem 0.35rem rgba(0,0,0,.1);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        
+        .data-table {
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background-color: var(--primary-color);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        
+        .kpi-card {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 0.15rem 0.35rem rgba(0,0,0,.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .kpi-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .kpi-label {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        
+        .table-responsive {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        .loading-spinner {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+        
+        .date-range-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .quick-date-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+
+        .clear-filters-btn {
+            margin-top: 24px; /* Align with other filters */
+        }
+
+        .program-link {
+    color: #325788;
+    text-decoration: none;
+    font-weight: 500;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.program-link:hover {
+    color: #007bff;
+    
+}
+
+
+    </style>
+</head>
+<body>
+
+        <!-- Program Details Modal -->
+<div class="modal fade" id="programModal" tabindex="-1" aria-labelledby="programModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="programModalLabel">Program Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="programModalBody">
+                <!-- Content will be loaded here -->
+                Loading program details...
+            </div>
+            <div class="modal-footer">
+                <!-- <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button> -->
+            </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner-border text-light" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-3">
+        <div class="dashboard-header">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h2><i class="bi bi-bar-chart-line"></i> Training Program Dashboard</h2>
+                    <p class="mb-0">Comprehensive view of training programs and attendance records</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <div class="btn-group">
+                        <button class="btn btn-light btn-sm" id="refreshBtn">
+                            <i class="bi bi-arrow-clockwise"></i> Refresh
+                        </button>
+                        <button class="btn btn-light btn-sm" id="exportBtn">
+                            <i class="bi bi-download"></i> Export
+                        </button>&nbsp;&nbsp;&nbsp;
+                        <button class="btn btn-danger btn-sm"  onclick="window.history.back();">
+                            <i class="bi bi-arrow-left"></i> Go back
+                        </button>                        
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <!-- Date Range Filters -->
+                <div class="col-md-2">
+                    <label for="startDate" class="form-label">From Date</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+                <div class="col-md-2">
+                    <label for="endDate" class="form-label">To Date</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+                <div class="col-md-1 quick-date-container">
+                    <label class="form-label invisible">Quick Range</label>
+                    <div class="btn-group w-100">
+                        <button type="button" class="btn btn-sm btn-outline-primary date-range-btn active" data-days="7">1W</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary date-range-btn" data-days="30">1M</button>
+                        <button type="button" class="btn btn-sm btn-outline-primary date-range-btn" data-days="90">3M</button>
+                    </div>
+                </div>
+                
+                <!-- Other Filters -->
+                <div class="col-md-1">
+                    <label for="yearFilter" class="form-label">Year</label>
+                    <select class="form-select" id="yearFilter">
+                        <option value="all">All Years</option>
+                    </select>
+                </div>
+                <div class="col-md-1">
+                    <label for="locationFilter" class="form-label">Location</label>
+                    <select class="form-select" id="locationFilter">
+                        <option value="all">All Locations</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label for="deptFilter" class="form-label">Department</label>
+                    <select class="form-select" id="deptFilter">
+                        <option value="all">All Departments</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2"> 
+                    <label for="programFilter" class="form-label">Program</label>
+                    <select class="form-select" id="programFilter">
+                        <option value="all">All Programs</option>
+                    </select>
+                </div>
+
+                <div class="col-md-1 clear-filters-container">
+                    <button class="btn btn-secondary clear-filters-btn w-100" id="clearFiltersBtn">
+                        <i class="bi bi-x-circle"></i> Clear Filters
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards -->
+        <div class="row mb-4 g-4">
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-value" id="totalPrograms">0</div>
+                    <div class="kpi-label">Total Programs</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-value" id="totalParticipants">0</div>
+                    <div class="kpi-label">Total Participants</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-value" id="attendanceRate">0%</div>
+                    <div class="kpi-label">Attendance Rate</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="kpi-card">
+                    <div class="kpi-value" id="totalMandays">0</div>
+                    <div class="kpi-label">Total Mandays</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 1 -->
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Programs by Department</span>
+                        <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                           title="Shows distribution of programs across departments"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="deptChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Attendance by Program</span>
+                        <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                           title="Shows percentage of attended vs not attended participants"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row 2 -->
+        <div class="row mt-4 g-4">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Training Mode Distribution</span>
+                        <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                           title="Shows internal vs external training programs"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="modeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span>Training by Nature</span>
+                        <i class="bi bi-info-circle" data-bs-toggle="tooltip" 
+                           title="Shows distribution of training by nature (Technical, etc.)"></i>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="natureChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Training Program Details</span>
+                <div>
+                    <span class="badge bg-primary" id="recordCount">0 records</span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive" style="max-height: 450px; overflow-y: auto;">
+                    <table class="table table-striped table-hover data-table">
+                        <thead class="thead-dark">
+                            <tr>
+                                <th>Program ID</th>
+                                <th>Program Name</th>
+                                <th>Location</th>
+                                <th>Participants</th>
+                                <th>Attended</th>
+                                <th>Attendance %</th>
+                                <th>Mandays</th>
+                                <th>From Date</th>
+                                <th>To Date</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <!-- Data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+
+
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    
+    
+    <script>
+        // Global variables
+        let trainingData = [];
+        let filterOptions = {};
+        let deptChart, attendanceChart, modeChart, natureChart;
+        
+        // Initialize the dashboard when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            clearAllFilters(); // Clear all filters on page load
+            loadData();
+            
+            // Add event listeners
+            document.getElementById('startDate').addEventListener('change', handleDateChange);
+            document.getElementById('endDate').addEventListener('change', handleDateChange);
+            document.getElementById('yearFilter').addEventListener('change', loadData);
+            document.getElementById('locationFilter').addEventListener('change', loadData);
+            document.getElementById('deptFilter').addEventListener('change', loadData);
+            document.getElementById('programFilter').addEventListener('change', loadData); // NEW: Add the program filter listener
+            document.getElementById('clearFiltersBtn').addEventListener('click', clearAllFilters);
+            
+            refreshBtn.addEventListener('click', loadData);
+            exportBtn.addEventListener('click', exportData);
+            
+            // Quick date range buttons
+            document.querySelectorAll('.date-range-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.date-range-btn').forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    const days = parseInt(this.getAttribute('data-days'));
+                    setDateRange(days);
+                    loadData();
+                });
+            });
+        });
+        
+        // Initialize default dates
+        function initDefaultDates() {
+            setDateRange(activeDateRange);
+        }
+
+         // Clear all filters
+         function clearAllFilters() {
+            // Clear date inputs
+            document.getElementById('startDate').value = '';
+            document.getElementById('endDate').value = '';
+            
+            // Reset quick range buttons
+            document.querySelectorAll('.date-range-btn').forEach(btn => btn.classList.remove('active'));
+            
+            // Reset dropdown filters
+            document.getElementById('yearFilter').value = 'all';
+            document.getElementById('locationFilter').value = 'all';
+            document.getElementById('deptFilter').value = 'all';
+            document.getElementById('programFilter').value = 'all';
+            
+            // Reload data with cleared filters
+            loadData();
+        }
+        
+        // Set date range based on days (only used when quick range buttons are clicked)
+        function setDateRange(days) {
+            const endDate = new Date();
+            const startDate = new Date();
+            startDate.setDate(endDate.getDate() - days);
+            
+            document.getElementById('startDate').valueAsDate = startDate;
+            document.getElementById('endDate').valueAsDate = endDate;
+        }
+        
+        // Handle date change validation
+        function handleDateChange() {
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            
+            if (startDate && endDate && startDate > endDate) {
+                alert('End date must be after start date');
+                document.getElementById('startDate').value = '';
+                document.getElementById('endDate').value = '';
+                return;
+            }
+            
+            // If dates are manually changed, remove active state from quick range buttons
+            document.querySelectorAll('.date-range-btn').forEach(btn => btn.classList.remove('active'));
+            
+            loadData();
+        }
+        
+        // Show loading spinner
+        function showLoading() {
+            loadingSpinner.style.display = 'flex';
+        }
+        
+        // Hide loading spinner
+        function hideLoading() {
+            loadingSpinner.style.display = 'none';
+        }
+        
+        // Initialize charts with empty data
+        function initCharts() {
+            const chartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right'
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                label += context.raw;
+                                if (context.chart.data.percentages) {
+                                    label += ` (${context.chart.data.percentages[context.dataIndex]}%)`;
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            };
+            
+            // Department Chart (Bar)
+            const deptCtx = document.getElementById('deptChart').getContext('2d');
+            deptChart = new Chart(deptCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Programs',
+                        data: [],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Attendance Chart (Doughnut)
+            const attendanceCtx = document.getElementById('attendanceChart').getContext('2d');
+            attendanceChart = new Chart(attendanceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Attended', 'Not Attended'],
+                    datasets: [{
+                        label: 'Attendance',
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(28, 200, 138, 0.7)',
+                            'rgba(231, 74, 59, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(28, 200, 138, 1)',
+                            'rgba(231, 74, 59, 1)'
+                        ],
+                        borderWidth: 1
+                    }],
+                    percentages: ['0%', '0%']
+                },
+                options: chartOptions
+            });
+            
+            // Mode Chart (Pie)
+            const modeCtx = document.getElementById('modeChart').getContext('2d');
+            modeChart = new Chart(modeCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Internal', 'External'],
+                    datasets: [{
+                        label: 'Training Mode',
+                        data: [0, 0],
+                        backgroundColor: [
+                            'rgba(78, 115, 223, 0.7)',
+                            'rgba(246, 194, 62, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(78, 115, 223, 1)',
+                            'rgba(246, 194, 62, 1)'
+                        ],
+                        borderWidth: 1
+                    }],
+                    percentages: ['0%', '0%']
+                },
+                options: chartOptions
+            });
+            
+            // Nature Chart (Bar)
+            const natureCtx = document.getElementById('natureChart').getContext('2d');
+            natureChart = new Chart(natureCtx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Training by Nature',
+                        data: [],
+                        backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    ...chartOptions,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Load data from API
+        async function loadData() {
+            showLoading();
+            
+            try {
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const year = document.getElementById('yearFilter').value;
+                const location = document.getElementById('locationFilter').value;
+                const dept = document.getElementById('deptFilter').value;
+                const program = document.getElementById('programFilter').value;
+                
+                // Build API URL with all filters
+        let apiUrl = `api.php?year=${year}&location=${location}&dept=${dept}&program=${program}`;
+                
+                if (startDate && endDate) {
+                    apiUrl += `&startDate=${startDate}&endDate=${endDate}`;
+                }
+                
+                const response = await fetch(apiUrl);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                trainingData = result.data || [];
+                filterOptions = result.filterOptions || {};
+                
+                updateDashboard();
+            } catch (error) {
+                console.error('Error loading data:', error);
+                alert('Error loading data. Please check console for details.');
+            } finally {
+                hideLoading();
+            }
+        }
+        
+        // Update the entire dashboard
+        function updateDashboard() {
+            updateKPIs();
+            updateCharts();
+            updateDataTable();
+            updateFilterDropdowns();
+        }
+        
+        // Update KPI cards
+        function updateKPIs() {
+            // Calculate total unique programs
+            const programIds = [...new Set(trainingData.map(item => item.program_id))];
+            const totalPrograms = programIds.length;
+            
+            // Calculate total participants
+            const totalParticipants = trainingData.length;
+            
+            // Calculate attendance
+            const attendedCount = trainingData.filter(item => item.attendance === 'A').length;
+            const attendanceRate = totalParticipants > 0 
+                ? Math.round((attendedCount / totalParticipants) * 100) 
+                : 0;
+            
+             // Calculate total mandays - keep decimal places
+    const totalMandays = trainingData.reduce((sum, item) => {
+        const manday = parseFloat(item.mandays) || 0;
+        return sum + manday;
+    }, 0);
+            
+            // Update KPI cards
+            document.getElementById('totalPrograms').textContent = totalPrograms;
+            document.getElementById('totalParticipants').textContent = totalParticipants;
+            document.getElementById('attendanceRate').textContent = `${attendanceRate}%`;
+            document.getElementById('totalMandays').textContent = 
+        totalMandays % 1 === 0 ? totalMandays : totalMandays.toFixed(2);
+        }
+        
+        // Update charts with current data
+        function updateCharts() {
+            // Process data for department chart
+            const deptCounts = {};
+            trainingData.forEach(item => {
+                deptCounts[item.dept] = (deptCounts[item.dept] || 0) + 1;
+            });
+            
+            // Update department chart
+            deptChart.data.labels = Object.keys(deptCounts);
+            deptChart.data.datasets[0].data = Object.values(deptCounts);
+            deptChart.update();
+            
+            // Process data for attendance chart
+            const attended = trainingData.filter(item => item.attendance === 'A').length;
+            const notAttended = trainingData.length - attended;
+            const attendancePercent = trainingData.length > 0 
+                ? Math.round((attended / trainingData.length) * 100) 
+                : 0;
+            const notAttendedPercent = 100 - attendancePercent;
+            
+            attendanceChart.data.datasets[0].data = [attended, notAttended];
+            attendanceChart.data.percentages = [
+                `${attendancePercent}%`,
+                `${notAttendedPercent}%`
+            ];
+            attendanceChart.update();
+            
+            // Process data for mode chart
+            const internal = trainingData.filter(item => item.training_mode === 'Internal').length;
+            const external = trainingData.filter(item => item.training_mode === 'External').length;
+            const internalPercent = trainingData.length > 0 
+                ? Math.round((internal / trainingData.length) * 100) 
+                : 0;
+            const externalPercent = 100 - internalPercent;
+            
+            modeChart.data.datasets[0].data = [internal, external];
+            modeChart.data.percentages = [
+                `${internalPercent}%`,
+                `${externalPercent}%`
+            ];
+            modeChart.update();
+            
+            // Process data for nature chart
+            const natureCounts = {};
+            trainingData.forEach(item => {
+                natureCounts[item.nature_of_training] = (natureCounts[item.nature_of_training] || 0) + 1;
+            });
+            
+            natureChart.data.labels = Object.keys(natureCounts);
+            natureChart.data.datasets[0].data = Object.values(natureCounts);
+            natureChart.update();
+        }
+        
+        // Update data table with current data
+        function updateDataTable() {
+            const tableBody = document.getElementById('dataTableBody');
+            tableBody.innerHTML = '';
+            
+            // Group data by program
+            const programMap = {};
+            
+            trainingData.forEach(item => {
+                if (!programMap[item.program_id]) {
+                    programMap[item.program_id] = {
+                        program_id: item.program_id,
+                        program_name: item.program_name,
+                        dept: item.dept,
+                        location: item.location,
+                        //duration: item.duration,
+                        participants: 0,
+                        attended: 0,
+                        mandays: 0,
+                        from_date: item.from_date,
+                        to_date: item.to_date,
+                        training_mode: item.training_mode
+                    };
+                }
+                
+                programMap[item.program_id].participants++;
+                const mandayValue = parseFloat(item.mandays) || 0;
+        programMap[item.program_id].mandays += mandayValue;
+
+                 // Update earliest from_date
+        if (new Date(item.from_date) < new Date(programMap[item.program_id].from_date)) {
+            programMap[item.program_id].from_date = item.from_date;
+        }
+        
+        // Update latest to_date
+        if (new Date(item.to_date) > new Date(programMap[item.program_id].to_date)) {
+            programMap[item.program_id].to_date = item.to_date;
+        }
+
+                if (item.attendance === 'A') {
+                    programMap[item.program_id].attended++;
+                }
+            });
+            
+            // Add rows to table
+            Object.values(programMap).forEach(program => {
+                const attendanceRate = program.participants > 0 
+                    ? Math.round((program.attended / program.participants) * 100) 
+                    : 0;
+
+                    // Format mandays display
+        const formattedMandays = program.mandays % 1 === 0 
+            ? program.mandays 
+            : program.mandays.toFixed(2);
+                
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>
+                    <a href="#" class="program-link" data-program-id="${program.program_id}">
+                        ${program.program_id}
+                    </a>
+                    </td>
+                    <td>${program.program_name}</td>
+
+                   
+                    <td>${program.location}</td>
+                    
+                    <td>${program.participants}</td>
+                    <td>${program.attended}</td>
+                    <td>${attendanceRate}%</td>
+                    <td>${formattedMandays}</td>
+                    <td>${formatDate(program.from_date)}</td>
+                    <td>${formatDate(program.to_date)}</td>
+                    <td>${program.training_mode}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+            
+            // Update record count
+            //document.getElementById('recordCount').textContent = `${trainingData.length} records`;
+            document.getElementById('recordCount').textContent = `${Object.keys(programMap).length} programs`; // If trainingData grows large, grouping and DOM updates may slow down.
+
+            document.querySelectorAll('.clickable-program').forEach(cell => {
+    cell.addEventListener('click', () => {
+        const programId = cell.getAttribute('data-program-id');
+        const filteredData = trainingData.filter(item => item.program_id === programId);
+
+        updateCharts(filteredData); // Update the graphs with this program's data
+        updateParticipantTable(filteredData); // Optionally update the participant table
+    });
+});
+
+ // Add click handlers for program links
+    document.querySelectorAll('.program-link').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            const programId = this.getAttribute('data-program-id');
+            showProgramDetails(programId);
+        });
+    });
+    
+    document.getElementById('recordCount').textContent = `${Object.keys(programMap).length} programs`;
+        
+        }
+
+        // Add this helper function to format numbers:
+function formatNumber(value) {
+    return value % 1 === 0 ? value : parseFloat(value).toFixed(2);
+}
+        
+        // Format date for display
+        function formatDate(dateString) {
+            if (!dateString) return 'N/A';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+        
+        // Update filter dropdowns with proper error handling
+        function updateFilterDropdowns() {
+    try {
+        // Store current selections
+        const currentProgram = document.getElementById('programFilter').value;
+        
+        // Update all dropdowns
+        const yearSelect = document.getElementById('yearFilter');
+        updateSelectOptions(yearSelect, filterOptions.years || [], 'Years');
+        
+        const locationSelect = document.getElementById('locationFilter');
+        updateSelectOptions(locationSelect, filterOptions.locations || [], 'Locations');
+        
+        const deptSelect = document.getElementById('deptFilter');
+        updateSelectOptions(deptSelect, filterOptions.depts || [], 'Departments');
+        
+        // Update program dropdown while preserving selection
+        const programSelect = document.getElementById('programFilter');
+        const currentProgramExists = filterOptions.programs?.some(p => p.id == currentProgram);
+        
+        updateProgramSelectOptions(programSelect, filterOptions.programs || [], 'Programs');
+        
+        // Restore selection if it still exists
+        if (currentProgram && currentProgramExists) {
+            programSelect.value = currentProgram;
+        }
+        
+    } catch (error) {
+        console.error('Error updating filter dropdowns:', error);
+    }
+}
+
+        function updateProgramSelectOptions(selectElement, options, label) {
+    if (!selectElement) return;
+    
+    // Store current value
+    const currentValue = selectElement.value;
+    
+    // Clear existing options (keep the first "All" option)
+    selectElement.innerHTML = '';
+    const allOption = document.createElement('option');
+    allOption.value = 'all';
+    allOption.textContent = 'All ' + label;
+    selectElement.appendChild(allOption);
+    
+    // Add new options
+    if (options && options.length > 0) {
+        options.forEach(option => {
+            if (option && option.id && option.name) {
+                const opt = document.createElement('option');
+                opt.value = option.id;
+                opt.textContent = option.name;
+                selectElement.appendChild(opt);
+            }
+        });
+        
+        // Restore previous selection if it still exists
+        const optionExists = options.some(opt => opt.id === currentValue);
+        if (optionExists) {
+            selectElement.value = currentValue;
+        }
+    } else {
+        console.warn('No options provided for', selectElement.id);
+    }
+}
+        
+        // Improved select options updater
+        function updateSelectOptions(selectElement, options, label) {
+            if (!selectElement) return;
+            
+            // Store current value
+            const currentValue = selectElement.value;
+            
+            // Clear existing options (keep the first "All" option)
+            selectElement.innerHTML = '';
+            const allOption = document.createElement('option');
+            allOption.value = 'all';
+            allOption.textContent = 'All ' + label;
+            selectElement.appendChild(allOption);
+            
+            // Add new options
+            if (options && options.length > 0) {
+                options.forEach(option => {
+                    if (option && option.toString().trim() !== '') {
+                        const opt = document.createElement('option');
+                        opt.value = option;
+                        opt.textContent = option;
+                        selectElement.appendChild(opt);
+                    }
+                });
+                
+                // Restore previous selection if it still exists
+                if (options.includes(currentValue)) {
+                    selectElement.value = currentValue;
+                }
+            } else {
+                console.warn('No options provided for', selectElement.id);
+            }
+        }
+        
+        // Export data to CSV
+        function exportData() {
+            if (trainingData.length === 0) {
+                alert('No data to export');
+                return;
+            }
+            
+            // Extract headers
+            const headers = Object.keys(trainingData[0]);
+            
+            // Prepare CSV content
+            let csvContent = headers.join(',') + '\n';
+            
+            // Add data rows
+            trainingData.forEach(item => {
+                const row = headers.map(header => {
+                    // Ensure all values are properly formatted
+                    let value = item[header] !== undefined ? item[header] : '';
+                    // Convert dates to strings
+                    if (header === 'from_date' || header === 'to_date' || header === 'attend_date') {
+                        value = formatDate(value);
+                    }
+                    // Escape quotes and wrap in quotes if contains comma
+                    if (typeof value === 'string' && value.includes(',')) {
+                        return `"${value.replace(/"/g, '""')}"`;
+                    }
+                    return value;
+                });
+                csvContent += row.join(',') + '\n';
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'training_data_export.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        
+    </script>
+    <script>
+        // Add this function with your other utility functions
+        async function showProgramDetails(programId) {
+    showLoading();
+    
+    try {
+        const response = await fetch(`api.php?program=${programId}`);
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const result = await response.json();
+        let programData = result.data || [];
+
+        if (programData.length === 0) {
+            alert('No program data found');
+            return;
+        }
+
+        // ✅ Filter out past programs
+        const today = new Date();
+        programData = programData.filter(p => new Date(p.from_date) <= today);
+
+        if (programData.length === 0) {
+            alert('Program not started yet.');
+            return;
+        }
+        
+       
+        
+        const program = programData[0];
+        
+        // Calculate statistics
+        const totalParticipants = programData.length;
+        const presentParticipants = programData.filter(p => p.attendance === 'A').length;
+        const absentParticipants = totalParticipants - presentParticipants;
+        const attendanceRate = totalParticipants > 0 
+            ? Math.round((presentParticipants / totalParticipants) * 100)
+            : 0;
+        const totalMandays = programData.reduce((sum, p) => sum + (parseFloat(p.mandays) || 0), 0);
+        const formattedMandays = totalMandays % 1 === 0 ? totalMandays : totalMandays.toFixed(2);
+        
+        // Separate present and absent participants
+        const presentData = programData.filter(p => p.attendance === 'A');
+        const absentData = programData.filter(p => p.attendance !== 'A');
+        const sortedParticipants = [...presentData, ...absentData];
+
+        const modalContent = `
+            <style>
+                .program-info-section {
+                    background-color: #c3ebeb;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+                .stats-section {
+                    background-color: #e9ecef;
+                    border-radius: 8px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                }
+                .table-header-fixed {
+                    position: sticky;
+                    top: 0;
+                    background-color: white;
+                    z-index: 10;
+                    box-shadow: 0 2px 2px -1px rgba(0,0,0,0.1);
+                }
+                .attendance-present {
+                    color: #28a745;
+                    font-weight: 500;
+                    background-color: rgba(40, 167, 69, 0.1);
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                }
+                .attendance-absent {
+                    color: #dc3545;
+                    font-weight: 500;
+                    background-color: rgba(220, 53, 69, 0.1);
+                    padding: 3px 8px;
+                    border-radius: 4px;
+                }
+                .stats-container {
+                display: flex; /* Use flexbox to arrange items horizontally */
+                flex-wrap: wrap; /* Allow items to wrap to the next line if space is limited */
+                gap: 15px; /* Space between each stat item */
+                justify-content: center; /* Center the items if there's extra space */
+                margin-top: 20px; /* Add some top margin for spacing */
+            }
+
+            .stat-item {
+                background-color: #f8f9fa; /* Light background for each stat */
+                border: 1px solid #edc7c7c7; /* Subtle border */
+                border-radius: 8px; /* Rounded corners */
+                padding: 15px 20px; /* Padding inside each stat item */
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+                display: flex; /* Use flexbox for content within the item */
+                flex-direction: column; /* Stack label and value vertically */
+                align-items: flex-start; /* Align text to the start */
+               
+                flex-grow: 1; /* Allow items to grow to fill space */
+               
+            }
+
+            .stat-item h6 { /* Style for the stat label */
+                margin-bottom: 5px;
+                color: #555;
+                font-size: 14px;
+                font-weight: normal;
+            }
+
+            .stat-item .stat-value { /* Style for the actual value */
+                font-size: 24px;
+                font-weight: bold;
+                color: #333;
+            }
+                            /* Specific badge colors (if you want them to stand out) */
+            .badge-present {
+                background-color: #28a745; /* Green */
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+
+            .badge-absent {
+                background-color: #dc3545; /* Red */
+                color: white;
+                padding: 5px 10px;
+                border-radius: 5px;
+                font-size: 16px;
+            }
+            </style>
+
+            <div class="program-info-section">
+                <h5><i class="bi bi-info-circle"></i> Program Information</h5>
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <th width="40%">Program ID:</th>
+                                <td>${program.program_id}</td>
+                            </tr>
+                            <tr>
+                                <th>Program Name:</th>
+                                <td>${program.program_name}</td>
+                            </tr>
+                           
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm table-borderless">
+                            <tr>
+                                <th width="40%">Location:</th>
+                                <td>${program.location}</td>
+                            </tr>
+                            <tr>
+                                <th>Dates:</th>
+                                <td>${formatDate(program.from_date)} to ${formatDate(program.to_date)}</td>
+                            </tr>
+                            <tr>
+                                <th>Training Mode:</th>
+                                <td>${program.training_mode}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+    <h5><i class="bi bi-graph-up"></i> Statistics</h5>
+    <div class="stats-container">
+        <div class="stat-item">
+            <h6>Total Participants:</h6>
+            <span class="stat-value">${totalParticipants}</span>
+        </div>
+
+        <div class="stat-item">
+            <h6>Present:</h6>
+            <span class="badge badge-present stat-value">${presentParticipants}</span>
+        </div>
+
+        <div class="stat-item">
+            <h6>Absent:</h6>
+            <span class="badge badge-absent stat-value">${absentParticipants}</span>
+        </div>
+
+        <div class="stat-item">
+            <h6>Attendance Rate:</h6>
+            <span class="stat-value">${attendanceRate}%</span>
+        </div>
+
+        <div class="stat-item">
+            <h6>Total Mandays:</h6>
+            <span class="stat-value">${formattedMandays}</span>
+        </div>
+    </div>
+</div>
+
+            
+            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                <table class="table table-sm table-striped">
+                    <thead class="table-header-fixed">
+                        <tr>
+                            <th>#</th>
+                            <th>Employee ID</th>
+                            <th>Name</th>
+                            <th>Department</th>
+                            <th>Attendance</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${sortedParticipants.map((p, index) => `
+                            <tr>
+                                <td>${index + 1}</td>
+                                <td>${p.empno || 'N/A'}</td>
+                                <td>${p.name || 'N/A'}</td>
+                                <td>${p.dept || 'N/A'}</td>
+                                <td>
+                                    <span class="${p.attendance === 'A' ? 'attendance-present' : 'attendance-absent'}">
+                                        ${p.attendance === 'A' ? 'Present' : 'Absent'}
+                                    </span>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        document.getElementById('programModalBody').innerHTML = modalContent;
+        document.getElementById('programModalLabel').textContent = `Program Details: ${program.program_name}`;
+        
+        const modal = new bootstrap.Modal(document.getElementById('programModal'));
+        modal.show();
+        
+    } catch (error) {
+        console.error('Error loading program details:', error);
+        alert('Error loading program details');
+    } finally {
+        hideLoading();
+    }
+}
+        </script>
+</body>
+<footer class="fixed-bottom" style='background-color: #34495E;'>
+    <div class="card-footer bg-transparent border-success">
+    <center>
+      <div id="small">
+    <!-- <small class="footer" style="color:white;"><a href="">OCMS Help</a> | <a href="feedback.php"> OCMS Feedback</a>  </small><br> -->
+    <!-- <small class="footer" style="color:white;"><a href="ocms_user_guide.pdf" target="_blank">OCMS Help</a> | <a href="feedback.php"> OCMS Feedback</a></small><br> -->
+    
+    <small class="" style="color:white;">Developed by IT department © <script type="text/javascript">document.write( new Date().getFullYear() );</script> all rights reserved by NSPCL |
+     <a class='nav-link' href='../mainpage.php'>Go to Mainpage</a>
+     
+    </small></div>
+    </center> 
+      </div>
+      </footer>
+</html>

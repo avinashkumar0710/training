@@ -1,0 +1,43 @@
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap');
+
+/* Your CSS styles go here */
+
+
+
+body {
+    font-weight: 600;
+    font-style: normal;
+    font-family: "Nunito Sans", sans-serif;
+    margin: 0;
+    /* Remove default body margin */
+    padding: 0;
+    /* Remove default body padding */
+    background-color: #5d87192e
+}
+
+/* Ensure the video fills the width */
+video {
+    width: 100%;
+    height: auto;
+    /* Maintain aspect ratio */
+    display: block;
+    /* Ensure the video is treated as a block element */
+}
+
+.scrollable1 {
+    height: 680px;
+    overflow-y: auto;
+    border-color: black;
+}
+
+
+
+#dtBasicExample {
+    border-radius: 25px;
+    border: 2px solid yellowgreen;
+}
+
+.nav-link {
+    color: #F8F9F9;
+}
